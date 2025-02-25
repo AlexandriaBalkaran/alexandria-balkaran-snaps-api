@@ -24,22 +24,54 @@ router.get('/photos', (req, res) => {
 	res.json(photos);
   });
 
-router.get("/photos/:id" , (req, res) => {
-	const id = req.params.id;
-	const photo = getPhotoById(id);
-	res.json(photo);
+// router.get("/photos/:id" , (req, res) => {
+// 	const id = req.params.id;
+// 	const photo = getPhotoById(id);
+// 	res.json(photo);
+// });
+router.get("/photos/:id", (req, res) => {
+    const id = req.params.id;
+    const photo = getPhotoById(id);
+    
+    if (photo) {
+        res.status(200).json(photo);
+    } else {
+        res.status(404).json({ error: "Photo not found" });
+    }
 });
 
-router.get("/photos/:id/comments" , (req, res) => {
-	const id = req.params.id;
-	const photo = getPhotoById(id);
-	res.json(photo.comments);
+// router.get("/photos/:id/comments" , (req, res) => {
+// 	const id = req.params.id;
+// 	const photo = getPhotoById(id);
+// 	res.json(photo.comments);
+// });
+router.get("/photos/:id/comments", (req, res) => {
+    const id = req.params.id;
+    const photo = getPhotoById(id);
+    
+    if (photo) {
+        res.status(200).json(photo.comments);
+    } else {
+        res.status(404).json({ error: "Photo not found" });
+    }
 });
 
 router.post("/photos/:id/comments", (req, res) => {
 	const id = req.params.id;
 	const { name, comment } = req.body;
 	const photo = getPhotoById(id);
+	const trimName = name.trim();
+    const trimComment = comment.trim();
+
+	// if (!name || !comment) {
+    //     return res
+    //         .status(400)
+	// .send(`Error: missing name or comment : ${name}, ${comment}`)
+	
+	// if (!trimName || !trimComment || typeof name !== 'string' || typeof comment !== 'string') {
+    //     return res.status(400).json({ error: "Invalid input. Please enter a valid name and comment." });
+    // }
+
 
 	const newComment = {
 	  id: uuidv4(),
@@ -49,6 +81,10 @@ router.post("/photos/:id/comments", (req, res) => {
 	};
 	photo.comments.push(newComment);
 	res.json(newComment);
-  });
+
+	fs.writeFileSync("./data/photos.json", JSON.stringify(photos.comment));
+
+	res.status(201).json(newComment);
+});
 
 export default router;
