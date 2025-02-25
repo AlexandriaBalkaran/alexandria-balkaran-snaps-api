@@ -1,6 +1,8 @@
 import express from 'express';
 import fs from 'fs'
 import crypto from 'crypto';
+import { timeStamp } from 'console';
+import { v4 as uuidv4 } from "uuid";
 
 const router = express.Router()
 
@@ -33,5 +35,20 @@ router.get("/photos/:id/comments" , (req, res) => {
 	const photo = getPhotoById(id);
 	res.json(photo.comments);
 });
+
+router.post("/photos/:id/comments", (req, res) => {
+	const id = req.params.id;
+	const { name, comment } = req.body;
+	const photo = getPhotoById(id);
+
+	const newComment = {
+	  id: uuidv4(),
+	  name: name,
+	  comment: comment,
+	  timestamp: Date.now(),
+	};
+	photo.comments.push(newComment);
+	res.json(newComment);
+  });
 
 export default router;

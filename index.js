@@ -12,19 +12,13 @@ app.use(cors({ origin: CORS_ORIGIN }));
 
 app.use(express.json());
 
-// app.get('/photos', (req, res) => {
-//     res.json(photos);
-//   });
-  
-  // app.get('/tags', (req, res) => {
-  //   res.json(tags);
-  // });
 app.get("/tags", tags);
 
 // GET endpoint for all photos
 app.get("/photos", photos);
 app.get("/photos/:id", photos);
 app.get("/photos/:id/comments", photos);
+app.post("/photos/:id/comments", photos);
 
 
 app.listen(port, () => console.log(`Listening on ${port}`));
