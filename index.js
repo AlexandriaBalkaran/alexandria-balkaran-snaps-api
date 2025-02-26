@@ -8,9 +8,13 @@ import photos from "./routes/photos.js"
 const port = process.env.PORT || process.argv[2] || 8080;
 const { CORS_ORIGIN } = process.env;
 app.use(cors({ origin: CORS_ORIGIN }));
-
+app.use(cors());
+// const express = require('express');
+// const cors = require('cors');
 
 app.use(express.json());
+
+app.use("/images", express.static("public/images"));
 
 // GET endpoint for all tags
 app.get("/tags", tags);
