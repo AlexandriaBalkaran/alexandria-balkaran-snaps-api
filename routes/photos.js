@@ -59,8 +59,8 @@ router.get("/photos/:id/comments", (req, res) => {
 router.post("/photos/:id/comments", (req, res) => {
 	const id = req.params.id;
 	const { name, comment } = req.body;
-	const photo = getPhotoById(id);
-	
+	const photos = readPhotos();
+
 	// const trimName = name.trim();
     // const trimComment = comment.trim();
 
@@ -75,7 +75,7 @@ router.post("/photos/:id/comments", (req, res) => {
 	// if (!trimName || !trimComment || typeof name !== 'string' || typeof comment !== 'string') {
     //     return res.status(400).json({ error: "Invalid input. Please enter a valid name and comment." });
     // }
-
+	const photo = photos.find((photo) => photo.id === id);
 
 	const newComment = {
 	  id: uuidv4(),
@@ -83,12 +83,61 @@ router.post("/photos/:id/comments", (req, res) => {
 	  comment: comment,
 	  timestamp: Date.now(),
 	};
-	photo.comments.push(newComment);
-	res.json(newComment);
 
-	fs.writeFileSync("./data/photos.json", JSON.stringify(photos.comment));
+	// photo.comments.push(newComment);
+	// res.json(newComment);
 
-	res.status(201).json(newComment);
+	if (photo) {
+		photo.comments.push(newComment);
+		fs.writeFileSync("./data/photos.json", JSON.stringify(photos));
+		res.status(201).json(newComment);
+	} else {
+		res.status(404).json({error: "no comments"})
+	}
+	// fs.writeFileSync("./data/photos.json", JSON.stringify(photos, null, 2));
 });
 
 export default router;
+
+
+
+//STUFF FROM ABOVE
+// router.post("/photos/:id/comments", (req, res) => {
+// 	const id = req.params.id;
+// 	const { name, comment } = req.body;
+// 	// const photo = getPhotoById(id);
+
+// 	// const trimName = name.trim();
+//     // const trimComment = comment.trim();
+
+// 	// if (name.trim() === "" || comment.trim() === "") {
+// 	// 	return;
+
+// 	// if (!name || !comment) {
+//     //     return res
+//     //         .status(400)
+// 	// .send(`Error: missing name or comment : ${name}, ${comment}`)
+	
+// 	// if (!trimName || !trimComment || typeof name !== 'string' || typeof comment !== 'string') {
+//     //     return res.status(400).json({ error: "Invalid input. Please enter a valid name and comment." });
+//     // }
+// 	const photo = photos.find((photo) => photo.id === id);
+
+// 	const newComment = {
+// 	  id: uuidv4(),
+// 	  name: name,
+// 	  comment: comment,
+// 	  timestamp: Date.now(),
+// 	};
+
+// 	photo.comments.push(newComment);
+// 	res.json(newComment);
+
+// 	if (photo) {
+// 		fs.writeFileSync("./data/photos.json", JSON.stringify(photos.comment));
+// 		res.status(201).json(newComment);
+// 	} else {
+// 		res.status(404).json({error: "no comments"})
+// 	}
+// 	// fs.writeFileSync("./data/photos.json", JSON.stringify(photos, null, 2));
+// });
