@@ -12,6 +12,7 @@ app.use(cors({ origin: CORS_ORIGIN }));
 
 app.use(express.json());
 
+// GET endpoint for all tags
 app.get("/tags", tags);
 
 // GET endpoint for all photos

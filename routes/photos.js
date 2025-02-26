@@ -60,8 +60,12 @@ router.post("/photos/:id/comments", (req, res) => {
 	const id = req.params.id;
 	const { name, comment } = req.body;
 	const photo = getPhotoById(id);
-	const trimName = name.trim();
-    const trimComment = comment.trim();
+	
+	// const trimName = name.trim();
+    // const trimComment = comment.trim();
+
+	// if (name.trim() === "" || comment.trim() === "") {
+	// 	return;
 
 	// if (!name || !comment) {
     //     return res
