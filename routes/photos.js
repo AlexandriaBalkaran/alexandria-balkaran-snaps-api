@@ -1,143 +1,92 @@
-import express from 'express';
-import fs from 'fs'
-import crypto from 'crypto';
-import { timeStamp } from 'console';
+import express from "express";
+import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
 
-const router = express.Router()
+const router = express.Router();
 
 function readPhotos() {
-	const photosData = fs.readFileSync("./data/photos.json");
-	const parsedData = JSON.parse(photosData);
-	return parsedData;
+  const photosData = fs.readFileSync("./data/photos.json");
+  const parsedData = JSON.parse(photosData);
+  return parsedData;
 }
 
-function getPhotoById (id) {
-	const photos = readPhotos();
-	return photos.find((photo) => photo.id === id);
+function getPhotoById(id) {
+  const photos = readPhotos();
+  return photos.find((photo) => photo.id === id);
 }
-
 
 // GET endpoint for photos
-router.get('/photos', (req, res) => {
-	const photos = readPhotos();
-	res.json(photos);
-  });
+router.get("/photos", (req, res) => {
+  try {
+    const photos = readPhotos();
+    res.json(photos);
+  } catch (error) {
+    console.error("Error fetching photo:", error);
+  }
+});
 
-// router.get("/photos/:id" , (req, res) => {
-// 	const id = req.params.id;
-// 	const photo = getPhotoById(id);
-// 	res.json(photo);
-// });
 router.get("/photos/:id", (req, res) => {
+  try {
     const id = req.params.id;
     const photo = getPhotoById(id);
-    
+
     if (photo) {
-        res.status(200).json(photo);
+      res.status(200).json(photo);
     } else {
-        res.status(404).json({ error: "Photo not found" });
+      res.status(404).json({ error: "Photo not found" });
     }
+  } catch (error) {
+    console.error("Error fetching photo by id", error);
+  }
 });
 
-// router.get("/photos/:id/comments" , (req, res) => {
-// 	const id = req.params.id;
-// 	const photo = getPhotoById(id);
-// 	res.json(photo.comments);
-// });
 router.get("/photos/:id/comments", (req, res) => {
+  try {
     const id = req.params.id;
     const photo = getPhotoById(id);
-    
+
     if (photo) {
-        res.status(200).json(photo.comments);
+      res.status(200).json(photo.comments);
     } else {
-        res.status(404).json({ error: "Photo not found" });
+      res.status(404).json({ error: "Photo not found" });
     }
+  } catch (error) {
+    console.error("Error fetching photos:", error);
+  }
 });
 
+//Comments Post
 router.post("/photos/:id/comments", (req, res) => {
-	const id = req.params.id;
-	const { name, comment } = req.body;
-	const photos = readPhotos();
+  try {
+    const id = req.params.id;
+    const { name, comment } = req.body;
+    const photos = readPhotos();
 
-	// const trimName = name.trim();
-    // const trimComment = comment.trim();
+    if (name.trim() === "" || comment.trim() === "") {
+      return res
+        .status(400)
+        .send(`Error: missing name or comment : ${name}, ${comment}`);
+    }
 
-	// if (name.trim() === "" || comment.trim() === "") {
-	// 	return;
+    const photo = photos.find((photo) => photo.id === id);
 
-	// if (!name || !comment) {
-    //     return res
-    //         .status(400)
-	// .send(`Error: missing name or comment : ${name}, ${comment}`)
-	
-	// if (!trimName || !trimComment || typeof name !== 'string' || typeof comment !== 'string') {
-    //     return res.status(400).json({ error: "Invalid input. Please enter a valid name and comment." });
-    // }
-	const photo = photos.find((photo) => photo.id === id);
+    const newComment = {
+      id: uuidv4(),
+      name: name,
+      comment: comment,
+      timestamp: Date.now(),
+    };
 
-	const newComment = {
-	  id: uuidv4(),
-	  name: name,
-	  comment: comment,
-	  timestamp: Date.now(),
-	};
-
-	// photo.comments.push(newComment);
-	// res.json(newComment);
-
-	if (photo) {
-		photo.comments.push(newComment);
-		fs.writeFileSync("./data/photos.json", JSON.stringify(photos));
-		res.status(201).json(newComment);
-	} else {
-		res.status(404).json({error: "no comments"})
-	}
-	// fs.writeFileSync("./data/photos.json", JSON.stringify(photos, null, 2));
+    if (photo) {
+      photo.comments.push(newComment);
+      fs.writeFileSync("./data/photos.json", JSON.stringify(photos));
+      res.status(201).json(newComment);
+    } else {
+      res.status(404).json({ error: "Invalid name and comment" });
+    }
+  } catch (error) {
+    console.error("Error adding comment:", error);
+  }
 });
 
 export default router;
-
-
-
-//STUFF FROM ABOVE
-// router.post("/photos/:id/comments", (req, res) => {
-// 	const id = req.params.id;
-// 	const { name, comment } = req.body;
-// 	// const photo = getPhotoById(id);
-
-// 	// const trimName = name.trim();
-//     // const trimComment = comment.trim();
-
-// 	// if (name.trim() === "" || comment.trim() === "") {
-// 	// 	return;
-
-// 	// if (!name || !comment) {
-//     //     return res
-//     //         .status(400)
-// 	// .send(`Error: missing name or comment : ${name}, ${comment}`)
-	
-// 	// if (!trimName || !trimComment || typeof name !== 'string' || typeof comment !== 'string') {
-//     //     return res.status(400).json({ error: "Invalid input. Please enter a valid name and comment." });
-//     // }
-// 	const photo = photos.find((photo) => photo.id === id);
-
-// 	const newComment = {
-// 	  id: uuidv4(),
-// 	  name: name,
-// 	  comment: comment,
-// 	  timestamp: Date.now(),
-// 	};
-
-// 	photo.comments.push(newComment);
-// 	res.json(newComment);
-
-// 	if (photo) {
-// 		fs.writeFileSync("./data/photos.json", JSON.stringify(photos.comment));
-// 		res.status(201).json(newComment);
-// 	} else {
-// 		res.status(404).json({error: "no comments"})
-// 	}
-// 	// fs.writeFileSync("./data/photos.json", JSON.stringify(photos, null, 2));
-// });
