@@ -15,12 +15,9 @@ app.use(express.json());
 app.use("/images", express.static("public/images"));
 
 // GET endpoint for all tags
-app.get("/tags", tags);
+app.use("/tags", tags);
 
 // GET endpoint for all photos
-app.get("/photos", photos);
-app.get("/photos/:id", photos);
-app.get("/photos/:id/comments", photos);
-app.post("/photos/:id/comments", photos);
+app.use('/photos', photos)
 
 app.listen(port, () => console.log(`Listening on ${port}`));

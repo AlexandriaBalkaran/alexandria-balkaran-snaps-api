@@ -10,7 +10,7 @@ function readTags() {
 }
 
 // GET endpoint for tags
-router.get("/tags", (req, res) => {
+router.get("/", (req, res) => {
   try {
     const tags = readTags();
     res.json(tags);

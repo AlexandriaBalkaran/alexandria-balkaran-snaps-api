@@ -16,7 +16,7 @@ function getPhotoById(id) {
 }
 
 // GET endpoint for photos
-router.get("/photos", (req, res) => {
+router.get("/", (req, res) => {
   try {
     const photos = readPhotos();
     res.json(photos);
@@ -25,7 +25,7 @@ router.get("/photos", (req, res) => {
   }
 });
 
-router.get("/photos/:id", (req, res) => {
+router.get("/:id", (req, res) => {
   try {
     const id = req.params.id;
     const photo = getPhotoById(id);
@@ -40,53 +40,51 @@ router.get("/photos/:id", (req, res) => {
   }
 });
 
-router.get("/photos/:id/comments", (req, res) => {
-  try {
-    const id = req.params.id;
-    const photo = getPhotoById(id);
+router
+  .route("/:id/comments")
+  .get((req, res) => {
+    try {
+      const id = req.params.id;
+      const photo = getPhotoById(id);
 
-    if (photo) {
-      res.status(200).json(photo.comments);
-    } else {
-      res.status(404).json({ error: "Photo not found" });
+      if (photo) {
+        res.status(200).json(photo.comments);
+      } else {
+        res.status(404).json({ error: "Photo not found" });
+      }
+    } catch (error) {
+      console.error("Error fetching photos:", error);
     }
-  } catch (error) {
-    console.error("Error fetching photos:", error);
-  }
-});
+  })
+  .post((req, res) => {
+    try {
+      const id = req.params.id;
+      const { name, comment } = req.body;
+      const photos = readPhotos();
 
-//Comments Post
-router.post("/photos/:id/comments", (req, res) => {
-  try {
-    const id = req.params.id;
-    const { name, comment } = req.body;
-    const photos = readPhotos();
+      if (name.trim() === "" || comment.trim() === "") {
+        return res.status(400).send(`Error: missing name or comment : ${name}, ${comment}`);
+      }
 
-    if (name.trim() === "" || comment.trim() === "") {
-      return res
-        .status(400)
-        .send(`Error: missing name or comment : ${name}, ${comment}`);
+      const photo = photos.find((photo) => photo.id === id);
+
+      const newComment = {
+        id: uuidv4(),
+        name: name,
+        comment: comment,
+        timestamp: Date.now(),
+      };
+
+      if (photo) {
+        photo.comments.push(newComment);
+        fs.writeFileSync("./data/photos.json", JSON.stringify(photos));
+        res.status(201).json(newComment);
+      } else {
+        res.status(404).json({ error: "Invalid name and comment" });
+      }
+    } catch (error) {
+      console.error("Error adding comment:", error);
     }
-
-    const photo = photos.find((photo) => photo.id === id);
-
-    const newComment = {
-      id: uuidv4(),
-      name: name,
-      comment: comment,
-      timestamp: Date.now(),
-    };
-
-    if (photo) {
-      photo.comments.push(newComment);
-      fs.writeFileSync("./data/photos.json", JSON.stringify(photos));
-      res.status(201).json(newComment);
-    } else {
-      res.status(404).json({ error: "Invalid name and comment" });
-    }
-  } catch (error) {
-    console.error("Error adding comment:", error);
-  }
-});
+  });
 
 export default router;
